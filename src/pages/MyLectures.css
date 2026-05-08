@@ -1,73 +1,154 @@
-.my-lectures-page {
-  min-height: 100vh;
-  padding-bottom: 80px;
+.my-lectures-page { min-height: 100vh; padding-bottom: 80px; }
+
+.my-lectures-hero {
+  background: var(--black);
+  padding: 40px 0 36px;
 }
 
-.enrollment-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.my-hero-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
 }
 
-.enrollment-item {
-  display: flex;
-  align-items: center;
+.my-hero-sub { font-size: 14px; color: #888; }
+
+.my-body { padding-top: 36px; }
+
+.my-count {
+  font-size: 13px;
+  color: var(--gray-400);
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.enrollment-list { display: flex; flex-direction: column; gap: 12px; }
+
+.enrollment-card {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
   gap: 20px;
-  padding: 24px;
+  align-items: center;
+  padding: 20px 24px;
   background: white;
-  border: 1px solid #EBEBEB;
+  border: 1px solid #ebebeb;
   border-radius: var(--radius);
-  transition: all 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
-.enrollment-item:hover {
-  box-shadow: var(--shadow);
-  border-color: #D0D0D0;
+.enrollment-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  border-color: #d8d8d8;
 }
 
-.enrollment-icon {
-  font-size: 32px;
+.ec-thumb {
   width: 56px;
   height: 56px;
-  background: var(--orange-dim);
-  border-radius: 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.enrollment-info {
-  flex: 1;
-}
-
-.enrollment-title {
+.ec-thumb span {
+  font-family: var(--font-display);
   font-size: 16px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+.ec-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+.ec-title {
+  font-size: 15px;
   font-weight: 700;
-  margin-bottom: 6px;
-  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.enrollment-date {
+.ec-date { font-size: 12px; color: var(--gray-400); }
+
+.ec-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.ec-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ec-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.ec-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
   font-size: 13px;
+}
+
+.ec-cancel {
+  font-size: 12px;
   color: var(--gray-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
 }
 
-.enrollment-actions {
+.ec-cancel:hover { color: #ef4444; }
+
+/* Empty */
+.my-empty {
   display: flex;
-  gap: 8px;
-  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 24px;
+  gap: 12px;
+  text-align: center;
 }
 
-.cancel-btn:hover {
-  background: #FEF2F2 !important;
+.my-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  margin-bottom: 4px;
 }
+
+.my-empty h2 { font-size: 18px; font-weight: 700; }
+.my-empty p { font-size: 14px; color: var(--gray-400); }
+
+.loading-center { display: flex; justify-content: center; padding: 100px; }
 
 @media (max-width: 640px) {
-  .enrollment-item {
-    flex-wrap: wrap;
-  }
-  .enrollment-actions {
-    width: 100%;
-  }
+  .enrollment-card { grid-template-columns: 48px 1fr; gap: 14px; }
+  .ec-actions { grid-column: 1 / -1; justify-content: flex-end; }
 }

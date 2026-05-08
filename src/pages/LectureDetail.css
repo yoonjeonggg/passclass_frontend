@@ -3,6 +3,7 @@
   padding-bottom: 80px;
 }
 
+/* ── Hero ── */
 .detail-hero {
   background: var(--black);
   color: white;
@@ -45,10 +46,24 @@
 .detail-stats {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   font-size: 14px;
   color: var(--gray-300);
   flex-wrap: wrap;
+}
+
+.detail-stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-star { color: #f59e0b; }
+
+.stat-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255,255,255,0.15);
 }
 
 .detail-instructor {
@@ -73,11 +88,18 @@
   flex-shrink: 0;
 }
 
-.instructor-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.instructor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.detail-instructor-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: -6px -10px;
+  transition: background 0.15s;
+  display: inline-flex;
 }
+.detail-instructor-link:hover { background: rgba(255,255,255,0.07); }
 
 .detail-hero-thumb {
   border-radius: var(--radius);
@@ -86,11 +108,7 @@
   background: var(--gray-800);
 }
 
-.detail-hero-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.detail-hero-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 .thumb-placeholder-large {
   width: 100%;
@@ -98,10 +116,201 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 72px;
   background: linear-gradient(135deg, #2a2a2a, #1c1c1c);
+  color: rgba(255,255,255,0.15);
 }
 
+/* ── Player Zone ── */
+.player-zone {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  background: #0d0d0d;
+  height: calc((100vw - 360px) * 9 / 16 + 52px + 52px);
+  max-height: 780px;
+  min-height: 420px;
+}
+
+.player-video-col {
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  min-height: 0;
+}
+
+.player-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 52px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
+  flex-shrink: 0;
+}
+
+.player-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.player-back-btn:hover { color: white; background: #2a2a2a; }
+
+.player-title-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-embed {
+  flex: 1;
+  position: relative;
+  background: #000;
+  min-height: 0;
+}
+
+.player-embed iframe,
+.player-embed > div {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.player-footer {
+  height: 52px;
+  background: #1a1a1a;
+  border-top: 1px solid #2a2a2a;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.player-footer .btn { padding: 8px 20px; font-size: 13px; }
+
+.player-footer-done {
+  gap: 8px;
+  color: #22c55e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Chapter Sidebar ── */
+.player-chapter-sidebar {
+  background: #141414;
+  border-left: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.player-chapter-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid #2a2a2a;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.player-chapter-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ccc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-chapter-count {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+}
+
+/* Progress bar in sidebar */
+.player-progress-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #888;
+}
+
+.player-progress-pct {
+  font-weight: 700;
+  color: var(--orange);
+}
+
+.player-progress-track {
+  height: 4px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.player-progress-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Dark Chapter List */
+.chapters-list-dark {
+  overflow-y: auto;
+  flex: 1;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.chapters-list-dark .chapter-item {
+  border-bottom-color: #222;
+  background: transparent;
+}
+
+.chapters-list-dark .chapter-item:hover { background: #1f1f1f; }
+
+.chapters-list-dark .chapter-item.active {
+  background: rgba(255, 92, 0, 0.10);
+  border-left: 3px solid var(--orange);
+}
+
+.chapters-list-dark .chapter-item.completed {
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.chapters-list-dark .chapter-num { background: #2a2a2a; color: #888; }
+.chapters-list-dark .chapter-num.chapter-num-done { background: #16a34a; color: white; }
+.chapters-list-dark .chapter-num.chapter-num-active { background: var(--orange); color: white; }
+.chapters-list-dark .chapter-title { color: #ccc; font-size: 13px; }
+.chapters-list-dark .chapter-item.active .chapter-title { color: #fff; font-weight: 600; }
+.chapters-list-dark .chapter-item.completed .chapter-title { color: #aaa; }
+.chapters-list-dark .chapter-status-text { color: #16a34a; font-size: 11px; font-weight: 600; }
+.chapters-list-dark .chapter-play { color: #555; }
+.chapters-list-dark .chapter-item:hover .chapter-play { color: var(--orange); }
+.chapters-list-dark .chapter-item.active .chapter-play { color: var(--orange); }
+
+/* ── Body Layout ── */
 .detail-body {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -113,61 +322,121 @@
 .detail-main {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 0;
 }
 
-/* Video */
-.video-player-section {
+/* ── Progress Card (above tabs) ── */
+.lecture-progress-card {
+  padding: 20px 24px;
   border: 1px solid #ebebeb;
   border-radius: var(--radius);
+  background: #fafafa;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lpc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lpc-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--black);
+}
+
+.lpc-pct {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--orange);
+  font-family: var(--font-display);
+}
+
+.lpc-track {
+  height: 8px;
+  background: #e9e9e9;
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.video-header {
+.lpc-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.lpc-sub {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+/* ── Tabs ── */
+.detail-tabs {
   display: flex;
+  border-bottom: 2px solid #ebebeb;
+  margin-bottom: 32px;
+  gap: 0;
+}
+
+.detail-tab {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #ebebeb;
+  gap: 6px;
+  padding: 14px 20px;
   font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-400);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s;
+}
+
+.detail-tab:hover { color: var(--black); }
+
+.detail-tab.active {
+  color: var(--black);
+  border-bottom-color: var(--orange);
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--orange-dim);
+  color: var(--orange);
+  border-radius: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
-.video-embed {
-  position: relative;
-  padding-top: 56.25%; /* 기존 비율 */
-  background: black;
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-/* iframe을 최대한 넓게 */
-.video-embed iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--radius);
-}
-
-.video-embed > div {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #111;
-  color: white;
-  font-size: 14px;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Chapters */
+/* ── Chapters Section ── */
 .chapters-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.chapters-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chapters-count {
+  font-size: 13px;
+  color: var(--gray-400);
+  font-weight: 500;
 }
 
 .section-heading {
@@ -185,27 +454,30 @@
   overflow: hidden;
 }
 
+/* ── Chapter Item ── */
 .chapter-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 16px 20px;
   cursor: pointer;
   border-bottom: 1px solid #ebebeb;
   transition: background 0.15s;
 }
 
-.chapter-item:last-child {
-  border-bottom: none;
-}
-
-.chapter-item:hover {
-  background: #fafafa;
-}
+.chapter-item:last-child { border-bottom: none; }
+.chapter-item:hover { background: #fafafa; }
 
 .chapter-item.active {
   background: var(--orange-dim);
   border-left: 3px solid var(--orange);
+  padding-left: 17px;
+}
+
+.chapter-item.completed {
+  background: #f0fdf4;
+  border-left: 3px solid #22c55e;
+  padding-left: 17px;
 }
 
 .chapter-num {
@@ -216,21 +488,44 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
   color: var(--gray-600);
+  transition: background 0.15s, color 0.15s;
 }
 
-.chapter-item.active .chapter-num {
+.chapter-num.chapter-num-done {
+  background: #22c55e;
+  color: white;
+}
+
+.chapter-num.chapter-num-active {
   background: var(--orange);
   color: white;
 }
 
-.chapter-title {
+.chapter-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chapter-title {
   font-size: 14px;
   font-weight: 500;
+  color: var(--black);
+}
+
+.chapter-item.completed .chapter-title {
+  color: var(--gray-600);
+}
+
+.chapter-status-text {
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 600;
 }
 
 .chapter-play {
@@ -239,11 +534,10 @@
   transition: color 0.2s;
 }
 
-.chapter-item:hover .chapter-play {
-  color: var(--orange);
-}
+.chapter-item:hover .chapter-play { color: var(--orange); }
+.chapter-item.active .chapter-play { color: var(--orange); }
 
-/* Sidebar */
+/* ── Sidebar ── */
 .detail-sidebar {
   position: sticky;
   top: 80px;
@@ -262,11 +556,7 @@
   background: var(--gray-100);
 }
 
-.enroll-card-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.enroll-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 .enroll-card-body {
   padding: 24px;
@@ -298,6 +588,49 @@
   font-weight: 500;
 }
 
+/* Enroll card progress */
+.enroll-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.enroll-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.enroll-progress-pct {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--orange);
+}
+
+.enroll-progress-track {
+  height: 6px;
+  background: #e9e9e9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.enroll-progress-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.enroll-progress-sub {
+  font-size: 11px;
+  color: var(--gray-400);
+}
+
 .enroll-btn {
   width: 100%;
   justify-content: center;
@@ -305,7 +638,6 @@
   font-size: 15px;
 }
 
-/* Like button */
 .like-btn {
   width: 100%;
   justify-content: center;
@@ -320,9 +652,7 @@
   border: 1.5px solid #fc8181;
 }
 
-.like-btn-active:hover {
-  background: #ffe0e0;
-}
+.like-btn-active:hover { background: #ffe0e0; }
 
 .like-count {
   font-size: 12px;
@@ -330,7 +660,7 @@
   font-weight: 400;
 }
 
-/* Reviews */
+/* ── Reviews ── */
 .reviews-section {
   display: flex;
   flex-direction: column;
@@ -358,10 +688,7 @@
   color: var(--orange);
 }
 
-.star-input {
-  display: flex;
-  gap: 2px;
-}
+.star-input { display: flex; gap: 2px; }
 
 .star {
   font-size: 18px;
@@ -370,9 +697,7 @@
   user-select: none;
 }
 
-.star.filled {
-  color: #FFC107;
-}
+.star.filled { color: #FFC107; }
 
 .review-form {
   display: flex;
@@ -384,10 +709,7 @@
   background: #fafafa;
 }
 
-.review-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
+.review-textarea { resize: vertical; min-height: 100px; }
 
 .review-list {
   display: flex;
@@ -406,9 +728,7 @@
   gap: 10px;
 }
 
-.review-item:last-child {
-  border-bottom: none;
-}
+.review-item:last-child { border-bottom: none; }
 
 .review-top {
   display: flex;
@@ -418,11 +738,7 @@
   gap: 8px;
 }
 
-.review-author {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.review-author { display: flex; align-items: center; gap: 10px; }
 
 .review-avatar {
   width: 36px;
@@ -439,21 +755,9 @@
   flex-shrink: 0;
 }
 
-.review-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.review-nickname {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.review-date {
-  font-size: 12px;
-  color: var(--gray-400);
-}
+.review-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.review-nickname { font-size: 14px; font-weight: 700; }
+.review-date { font-size: 12px; color: var(--gray-400); }
 
 .review-content {
   font-size: 14px;
@@ -471,17 +775,36 @@
   border-radius: var(--radius);
 }
 
-@media (max-width: 900px) {
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .player-zone {
+    grid-template-columns: 1fr 300px;
+    height: calc((100vw - 300px) * 9 / 16 + 104px);
+  }
+}
+
+@media (max-width: 768px) {
   .detail-hero-inner {
     grid-template-columns: 1fr;
   }
-  .detail-hero-thumb {
-    display: none;
-  }
+  .detail-hero-thumb { display: none; }
   .detail-body {
     grid-template-columns: 1fr;
+    padding-top: 28px;
   }
-  .detail-sidebar {
-    position: static;
+  .detail-sidebar { position: static; }
+  .player-zone {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: none;
+  }
+  .player-chapter-sidebar {
+    border-left: none;
+    border-top: 1px solid #2a2a2a;
+    max-height: 320px;
+  }
+  .player-embed {
+    aspect-ratio: 16/9;
+    position: relative;
   }
 }

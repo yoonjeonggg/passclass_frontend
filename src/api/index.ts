@@ -6,7 +6,8 @@ import type {
   MyProfileResponse, ProfileResponse, PatchMyProfileRequest,
   CertificateRequest, CertificateResponse,
   LectureRequest, LectureCreateResponse, LectureDetailResponse, PageLectureListDto,
-  LectureChapterRequest, LectureChapterResponse, ChapterWatchResponse,
+  LectureChapterRequest, LectureChapterResponse, ChapterWatchResponse, LectureProgressResponse,
+  InstructorProfileResponse,
   EnrollmentResponse,
   ReviewRequest, ReviewResponse, ReviewSummaryResponse,
   LikeResponse,
@@ -60,6 +61,8 @@ export const lectureApi = {
     api.get<ApiResponse<LectureDetailResponse>>(`/api/lecture/${lectureId}`),
   create: (data: LectureRequest) =>
     api.post<ApiResponse<LectureCreateResponse>>('/api/lecture', data),
+  getInstructorProfile: (instructorId: number) =>
+    api.get<ApiResponse<InstructorProfileResponse>>(`/api/lecture/instructor/${instructorId}`),
 };
 
 // LectureChapter
@@ -74,8 +77,12 @@ export const chapterApi = {
     api.delete<ApiResponse<void>>(`/api/lecture/chapters/${chapterId}`),
   watch: (chapterId: number) =>
     api.get<ApiResponse<ChapterWatchResponse>>(`/api/lecture/chapters/${chapterId}/watch`),
+  saveProgress: (chapterId: number, watchedSeconds: number) =>
+    api.patch<ApiResponse<void>>(`/api/lecture/chapters/${chapterId}/progress`, { watchedSeconds }),
   complete: (chapterId: number) =>
     api.post<ApiResponse<void>>(`/api/lecture/chapters/${chapterId}/complete`),
+  getMyProgress: (lectureId: number) =>
+    api.get<ApiResponse<LectureProgressResponse>>(`/api/lecture/chapters/progress?lectureId=${lectureId}`),
 };
 
 // Enrollment

@@ -1,0 +1,246 @@
+.instructor-page {
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ── Hero ── */
+.instructor-hero {
+  background: var(--black);
+  color: white;
+  padding: 56px 0;
+}
+
+.instructor-hero-inner {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.instructor-avatar-lg {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,0.15);
+}
+
+.instructor-avatar-lg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.instructor-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.instructor-role-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--orange);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.instructor-name {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.instructor-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.instructor-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--gray-300);
+}
+
+.instructor-stat strong {
+  color: white;
+  font-weight: 700;
+}
+
+.instructor-stat-sep {
+  width: 1px;
+  height: 14px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* ── Body ── */
+.instructor-body {
+  padding-top: 48px;
+}
+
+.instructor-section-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.instructor-lecture-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-400);
+}
+
+/* ── Lecture Grid ── */
+.instructor-lectures-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* ── Lecture Card ── */
+.ilec-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  border: 1px solid #ebebeb;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ilec-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.ilec-thumb {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background: var(--gray-100);
+}
+
+.ilec-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.ilec-card:hover .ilec-thumb img {
+  transform: scale(1.04);
+}
+
+.ilec-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1c1c1c, #2a2a2a);
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.15);
+  letter-spacing: -1px;
+}
+
+.ilec-category {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.ilec-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.ilec-cert {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ilec-title {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--black);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ilec-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ilec-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .instructor-lectures-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .instructor-hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .instructor-avatar-lg { width: 72px; height: 72px; font-size: 26px; }
+  .instructor-name { font-size: 24px; }
+  .instructor-lectures-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .instructor-lectures-grid {
+    grid-template-columns: 1fr;
+  }
+}

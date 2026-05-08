@@ -82,8 +82,18 @@ export interface LectureListDto {
 }
 
 export interface InstructorDto {
+  id: number;
   nickname: string;
   profileImage: string;
+}
+
+export interface InstructorProfileResponse {
+  id: number;
+  nickname: string;
+  profileImage: string;
+  lectureCount: number;
+  totalStudents: number;
+  lectures: LectureListDto[];
 }
 
 export interface ChapterDto {
@@ -153,6 +163,20 @@ export interface ChapterWatchResponse {
   videoUrl: string;
   chapterOrder: number;
   completed: boolean;
+  watchedSeconds: number;
+}
+
+export interface MyChapterProgress {
+  chapterId: number;
+  completed: boolean;
+  watchedSeconds: number;
+}
+
+export interface LectureProgressResponse {
+  completedCount: number;
+  totalCount: number;
+  progressPercent: number;
+  chapters: MyChapterProgress[];
 }
 
 // Enrollment

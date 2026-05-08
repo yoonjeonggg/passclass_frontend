@@ -216,12 +216,13 @@ img {
   justify-content: center;
   padding: 80px 20px;
   color: var(--gray-400);
-  gap: 12px;
+  gap: 8px;
   text-align: center;
 }
 .empty-state-icon {
   font-size: 48px;
   margin-bottom: 8px;
+  opacity: 0.3;
 }
 
 /* Animations */

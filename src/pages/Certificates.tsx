@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { certificateApi } from '../api';
 import type { CertificateResponse } from '../types';
 import { useToast } from '../components/Toast';
+import { IconSearch, IconAward, IconArrowRight } from '../components/Icons';
 import './Certificates.css';
 
 export default function Certificates() {
   const { toast } = useToast();
   const [certificates, setCertificates] = useState<CertificateResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [keyword, setKeyword] = useState('');
+  const [loading, setLoading]   = useState(true);
+  const [keyword, setKeyword]   = useState('');
   const [searching, setSearching] = useState(false);
+  const [isSearched, setIsSearched] = useState(false);
 
   useEffect(() => {
     certificateApi.getAll()
@@ -22,6 +25,7 @@ export default function Certificates() {
     e.preventDefault();
     if (!keyword.trim()) return;
     setSearching(true);
+    setIsSearched(true);
     try {
       const res = await certificateApi.search(keyword.trim());
       setCertificates(res.data);
@@ -34,6 +38,7 @@ export default function Certificates() {
 
   const handleReset = async () => {
     setKeyword('');
+    setIsSearched(false);
     setLoading(true);
     try {
       const res = await certificateApi.getAll();
@@ -45,60 +50,78 @@ export default function Certificates() {
 
   return (
     <div className="certs-page">
-      <div className="container">
-        <div className="page-header">
-          <h1>자격증 목록</h1>
-          <p style={{ color: 'var(--gray-400)', marginTop: 8, fontSize: 15 }}>
-            목표 자격증을 찾고 맞춤 강의를 수강하세요
-          </p>
-        </div>
+      <div className="certs-hero">
+        <div className="container">
+          <h1 className="certs-hero-title">자격증 목록</h1>
+          <p className="certs-hero-sub">목표 자격증을 찾고 맞춤 강의를 수강하세요</p>
 
-        {/* Search */}
-        <form className="cert-search" onSubmit={handleSearch}>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="자격증 검색 (예: 정보처리기사)"
-            value={keyword}
-            onChange={e => setKeyword(e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <button type="submit" className="btn btn-primary" disabled={searching}>
-            {searching ? '검색 중...' : '🔍 검색'}
-          </button>
-          {keyword && (
-            <button type="button" className="btn btn-ghost" onClick={handleReset}>
-              초기화
+          <form className="cert-search-form" onSubmit={handleSearch}>
+            <div className="cert-search-wrap">
+              <IconSearch size={16} className="cert-search-icon" />
+              <input
+                type="text"
+                className="cert-search-input"
+                placeholder="자격증명 검색 (예: 정보처리기사)"
+                value={keyword}
+                onChange={e => setKeyword(e.target.value)}
+              />
+              {keyword && (
+                <button type="button" className="cert-search-clear" onClick={handleReset}>
+                  ✕
+                </button>
+              )}
+            </div>
+            <button type="submit" className="btn btn-primary cert-search-btn" disabled={searching}>
+              {searching ? '검색 중...' : '검색'}
             </button>
-          )}
-        </form>
+          </form>
+        </div>
+      </div>
+
+      <div className="container certs-body">
+        {isSearched && (
+          <div className="certs-result-bar">
+            <span>"{keyword}" 검색 결과 — {certificates.length}건</span>
+            <button className="certs-reset-link" onClick={handleReset}>전체 보기</button>
+          </div>
+        )}
 
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '80px' }}>
-            <div className="spinner" />
-          </div>
+          <div className="loading-center"><div className="spinner" /></div>
         ) : certificates.length > 0 ? (
           <div className="cert-cards fade-up">
             {certificates.map((cert, i) => (
-              <div key={cert.id} className="cert-card card" style={{ animationDelay: `${i * 0.05}s` }}>
-                <div className="cert-card-icon">📋</div>
+              <Link
+                key={cert.id}
+                to={`/lectures?certificate=${cert.id}`}
+                className="cert-card"
+                style={{ animationDelay: `${i * 0.04}s` }}
+              >
+                <div className="cert-card-icon">
+                  <IconAward size={20} />
+                </div>
                 <div className="cert-card-body">
                   <h3 className="cert-card-name">{cert.name}</h3>
                   {cert.description && (
                     <p className="cert-card-desc">{cert.description}</p>
                   )}
-                  <div className="cert-card-date">
-                    등록일: {new Date(cert.createdAt).toLocaleDateString('ko-KR')}
+                  <div className="cert-card-footer">
+                    <span className="cert-card-date">
+                      {new Date(cert.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short' })}
+                    </span>
+                    <span className="cert-card-link">
+                      강의 보기 <IconArrowRight size={12} />
+                    </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
-          <div className="empty-state">
-            <div className="empty-state-icon">🔍</div>
-            <p style={{ fontSize: 16, fontWeight: 600 }}>검색 결과가 없습니다</p>
-            <p style={{ fontSize: 14, color: 'var(--gray-400)' }}>다른 키워드로 검색해보세요</p>
+          <div className="cert-empty">
+            <div className="cert-empty-icon"><IconSearch size={28} /></div>
+            <p className="cert-empty-title">검색 결과가 없습니다</p>
+            <p className="cert-empty-sub">다른 키워드로 검색해보세요</p>
           </div>
         )}
       </div>
