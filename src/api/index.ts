@@ -5,19 +5,20 @@ import type {
   LoginRequest, TokenResponse, AutoLoginRequest,
   MyProfileResponse, ProfileResponse, PatchMyProfileRequest,
   CertificateRequest, CertificateResponse,
-  LectureRequest, LectureCreateResponse, LectureDetailResponse, PageLectureListDto,
+  LectureRequest, LectureUpdateRequest, LectureCreateResponse, LectureDetailResponse, PageLectureListDto,
   LectureChapterRequest, LectureChapterResponse, ChapterWatchResponse, LectureProgressResponse,
   InstructorProfileResponse,
   EnrollmentResponse,
-  ReviewRequest, ReviewResponse, ReviewSummaryResponse,
+  ReviewRequest, ReviewReplyRequest, ReviewResponse, ReviewSummaryResponse,
   LikeResponse,
   NotificationResponse, UnreadCountResponse, PageResponse,
   FileResponse,
-  ProblemListItem, ProblemSolveRequest, ProblemSolveResponse,
+  ProblemListItem, ProblemDetail, ProblemSolveRequest, ProblemSolveResponse,
   ProblemCreateRequest, ProblemUpdateRequest, IdOnlyResponse,
   MockExamListItem, MockExamDetailResponse, MockExamSubmitRequest, MockExamSubmitResponse,
   MockExamCreateRequest, MockExamAddQuestionRequest,
   WrongNoteResponse,
+  LectureQuestionRequest, LectureAnswerRequest, LectureQuestionResponse,
 } from '../types';
 
 // Auth
@@ -66,6 +67,10 @@ export const lectureApi = {
     api.get<ApiResponse<LectureDetailResponse>>(`/api/lecture/${lectureId}`),
   create: (data: LectureRequest) =>
     api.post<ApiResponse<LectureCreateResponse>>('/api/lecture', data),
+  update: (lectureId: number, data: LectureUpdateRequest) =>
+    api.put<ApiResponse<void>>(`/api/lecture/${lectureId}`, data),
+  delete: (lectureId: number) =>
+    api.delete<ApiResponse<void>>(`/api/lecture/${lectureId}`),
   getInstructorProfile: (instructorId: number) =>
     api.get<ApiResponse<InstructorProfileResponse>>(`/api/lecture/instructor/${instructorId}`),
 };
@@ -106,6 +111,8 @@ export const reviewApi = {
     api.post<ApiResponse<void>>('/api/reviews', data),
   update: (reviewId: number, data: ReviewRequest) =>
     api.put<ApiResponse<void>>(`/api/reviews/${reviewId}`, data),
+  reply: (reviewId: number, data: ReviewReplyRequest) =>
+    api.post<ApiResponse<void>>(`/api/reviews/${reviewId}/reply`, data),
   getSummary: (lectureId: number) =>
     api.get<ApiResponse<ReviewSummaryResponse>>(`/api/reviews/summary?lectureId=${lectureId}`),
   getList: (lectureId: number) =>
@@ -135,6 +142,8 @@ export const fileApi = {
 export const problemApi = {
   getList: (certificateId: number) =>
     api.get<ApiResponse<ProblemListItem[]>>(`/api/problems?certificateId=${certificateId}`),
+  getDetail: (problemId: number) =>
+    api.get<ApiResponse<ProblemDetail>>(`/api/problems/${problemId}`),
   solve: (problemId: number, data: ProblemSolveRequest) =>
     api.post<ApiResponse<ProblemSolveResponse>>(`/api/problems/${problemId}/solve`, data),
   create: (data: ProblemCreateRequest) =>
@@ -167,6 +176,16 @@ export const mockExamApi = {
 export const wrongNoteApi = {
   getMyNotes: () => api.get<ApiResponse<WrongNoteResponse[]>>('/api/wrong-notes'),
   deleteNote: (wrongNoteId: number) => api.delete<ApiResponse<void>>(`/api/wrong-notes/${wrongNoteId}`),
+};
+
+// Q&A
+export const questionApi = {
+  getList: (lectureId: number) =>
+    api.get<ApiResponse<LectureQuestionResponse[]>>(`/api/lectures/${lectureId}/questions`),
+  ask: (lectureId: number, data: LectureQuestionRequest) =>
+    api.post<ApiResponse<LectureQuestionResponse>>(`/api/lectures/${lectureId}/questions`, data),
+  answer: (lectureId: number, questionId: number, data: LectureAnswerRequest) =>
+    api.post<ApiResponse<LectureQuestionResponse>>(`/api/lectures/${lectureId}/questions/${questionId}/answer`, data),
 };
 
 // Notification

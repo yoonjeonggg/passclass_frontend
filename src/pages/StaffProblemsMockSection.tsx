@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { certificateApi, problemApi, mockExamApi } from '../api';
-import type { CertificateResponse, ProblemListItem, MockExamListItem, ProblemUpdateRequest } from '../types';
+import type { CertificateResponse, ProblemListItem, MockExamListItem, MockExamQuestion, ProblemUpdateRequest, ProblemDetail } from '../types';
 import { useToast } from '../components/Toast';
 import './StaffProblemsMockSection.css';
 
@@ -25,8 +25,11 @@ export default function StaffProblemsMockSection() {
   const [mockTitle, setMockTitle] = useState('');
   const [addQMockId, setAddQMockId] = useState<number | ''>('');
   const [addQProblemId, setAddQProblemId] = useState<number | ''>('');
+  const [mockQuestions, setMockQuestions] = useState<MockExamQuestion[]>([]);
+  const [mockQuestionsLoading, setMockQuestionsLoading] = useState(false);
 
-  const [editProblem, setEditProblem] = useState<(ProblemListItem & ProblemUpdateRequest) | null>(null);
+  const [editProblem, setEditProblem] = useState<ProblemDetail | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     certificateApi.getAll()
@@ -55,6 +58,18 @@ export default function StaffProblemsMockSection() {
       .finally(() => setLoading(false));
   }, [certId, toast]);
 
+  useEffect(() => {
+    if (addQMockId === '') {
+      setMockQuestions([]);
+      return;
+    }
+    setMockQuestionsLoading(true);
+    mockExamApi.getDetail(Number(addQMockId))
+      .then(r => setMockQuestions(r.data.questions))
+      .catch(() => setMockQuestions([]))
+      .finally(() => setMockQuestionsLoading(false));
+  }, [addQMockId]);
+
   const reloadLists = () => {
     if (!certId) return;
     const id = Number(certId);
@@ -63,7 +78,7 @@ export default function StaffProblemsMockSection() {
         setProblems(p.data);
         setMocks(m.data);
       })
-      .catch(() => {});
+      .catch(() => toast('목록 갱신에 실패했습니다.', 'error'));
   };
 
   const handleCreateProblem = async (e: React.FormEvent) => {
@@ -99,12 +114,16 @@ export default function StaffProblemsMockSection() {
     }
   };
 
-  const openEdit = (p: ProblemListItem) => {
-    setEditProblem({
-      ...p,
-      correctAnswer: 1,
-      explanation: '',
-    });
+  const openEdit = async (p: ProblemListItem) => {
+    setEditLoading(true);
+    try {
+      const res = await problemApi.getDetail(p.id);
+      setEditProblem(res.data);
+    } catch {
+      toast('문제 정보를 불러오지 못했습니다.', 'error');
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleUpdateProblem = async (e: React.FormEvent) => {
@@ -113,12 +132,12 @@ export default function StaffProblemsMockSection() {
     try {
       await problemApi.update(editProblem.id, {
         content: editProblem.content,
-        option1: editProblem.option1,
-        option2: editProblem.option2,
-        option3: editProblem.option3,
-        option4: editProblem.option4,
-        correctAnswer: editProblem.correctAnswer,
-        explanation: editProblem.explanation,
+        option1: editProblem.option1 ?? '',
+        option2: editProblem.option2 ?? '',
+        option3: editProblem.option3 ?? '',
+        option4: editProblem.option4 ?? '',
+        correctAnswer: editProblem.correctAnswer ?? 1,
+        explanation: editProblem.explanation ?? '',
       });
       toast('문제가 수정되었습니다.', 'success');
       setEditProblem(null);
@@ -165,11 +184,19 @@ export default function StaffProblemsMockSection() {
       toast('모의고사와 문제를 선택하세요.', 'error');
       return;
     }
+    const alreadyAdded = mockQuestions.some(q => q.problemId === Number(addQProblemId));
+    if (alreadyAdded) {
+      toast('이미 이 모의고사에 등록된 문제입니다.', 'error');
+      return;
+    }
     try {
       await mockExamApi.addQuestion(Number(addQMockId), { problemId: Number(addQProblemId) });
       toast('모의고사에 문제가 추가되었습니다.', 'success');
       setAddQProblemId('');
       reloadLists();
+      // 등록된 문제 목록 갱신
+      const detail = await mockExamApi.getDetail(Number(addQMockId));
+      setMockQuestions(detail.data.questions);
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : '추가 실패', 'error');
     }
@@ -280,7 +307,9 @@ export default function StaffProblemsMockSection() {
                         <td className="cell-ellipsis">{p.content}</td>
                         <td>
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            <button type="button" className="staff-btn-sm staff-btn-muted" onClick={() => openEdit(p)}>수정</button>
+                            <button type="button" className="staff-btn-sm staff-btn-muted" onClick={() => openEdit(p)} disabled={editLoading}>
+                              {editLoading ? '...' : '수정'}
+                            </button>
                             <button type="button" className="staff-btn-sm staff-btn-danger" onClick={() => handleDeleteProblem(p.id)}>삭제</button>
                           </div>
                         </td>
@@ -333,7 +362,10 @@ export default function StaffProblemsMockSection() {
             <form onSubmit={handleAddQuestionToMock} className="staff-inline-form">
               <select
                 value={addQMockId === '' ? '' : String(addQMockId)}
-                onChange={e => setAddQMockId(e.target.value ? Number(e.target.value) : '')}
+                onChange={e => {
+                  setAddQMockId(e.target.value ? Number(e.target.value) : '');
+                  setAddQProblemId('');
+                }}
               >
                 <option value="">모의고사 선택</option>
                 {mocks.map(m => (
@@ -343,14 +375,54 @@ export default function StaffProblemsMockSection() {
               <select
                 value={addQProblemId === '' ? '' : String(addQProblemId)}
                 onChange={e => setAddQProblemId(e.target.value ? Number(e.target.value) : '')}
+                disabled={addQMockId === ''}
               >
                 <option value="">문제 선택</option>
-                {problems.map(p => (
-                  <option key={p.id} value={p.id}>#{p.id} — {p.content.slice(0, 48)}{p.content.length > 48 ? '…' : ''}</option>
-                ))}
+                {problems.map(p => {
+                  const registered = mockQuestions.some(q => q.problemId === p.id);
+                  return (
+                    <option key={p.id} value={p.id} disabled={registered}>
+                      {registered ? '✓ ' : ''}#{p.id} — {p.content.slice(0, 40)}{p.content.length > 40 ? '…' : ''}{registered ? ' (등록됨)' : ''}
+                    </option>
+                  );
+                })}
               </select>
-              <button type="submit" className="btn btn-outline">문제 추가</button>
+              <button type="submit" className="btn btn-outline" disabled={addQMockId === '' || addQProblemId === ''}>문제 추가</button>
             </form>
+
+            {addQMockId !== '' && (
+              <div style={{ marginTop: 16 }}>
+                <p className="staff-hint" style={{ marginBottom: 8 }}>
+                  현재 모의고사에 등록된 문제 ({mockQuestionsLoading ? '…' : `${mockQuestions.length}개`})
+                </p>
+                {mockQuestionsLoading ? (
+                  <div className="loading-center" style={{ padding: 16 }}><div className="spinner" /></div>
+                ) : mockQuestions.length === 0 ? (
+                  <p className="staff-hint">등록된 문제가 없습니다.</p>
+                ) : (
+                  <div className="staff-table-wrap">
+                    <table className="staff-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: 60 }}>순번</th>
+                          <th style={{ width: 80 }}>문제 ID</th>
+                          <th>지문</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {mockQuestions.map((q, idx) => (
+                          <tr key={q.problemId}>
+                            <td>{idx + 1}</td>
+                            <td>#{q.problemId}</td>
+                            <td className="cell-ellipsis">{q.content}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </section>
@@ -359,7 +431,6 @@ export default function StaffProblemsMockSection() {
         <div className="staff-modal-backdrop" role="presentation" onClick={() => setEditProblem(null)}>
           <div className="staff-modal" role="dialog" aria-modal onClick={e => e.stopPropagation()}>
             <h3>문제 수정 (#{editProblem.id})</h3>
-            <p className="staff-hint">목록 API에 정답·해설이 없을 수 있어, 수정 시 정답과 해설을 다시 확인해 주세요.</p>
             <form onSubmit={handleUpdateProblem}>
               <div className="staff-field">
                 <label>지문</label>
@@ -385,7 +456,7 @@ export default function StaffProblemsMockSection() {
                 <div className="staff-field">
                   <label>정답 번호</label>
                   <select
-                    value={editProblem.correctAnswer}
+                    value={editProblem.correctAnswer ?? 1}
                     onChange={e => setEditProblem(s => s && { ...s, correctAnswer: Number(e.target.value) })}
                   >
                     <option value={1}>1</option>
@@ -397,7 +468,7 @@ export default function StaffProblemsMockSection() {
                 <div className="staff-field" style={{ gridColumn: 'span 2' }}>
                   <label>해설</label>
                   <textarea
-                    value={editProblem.explanation}
+                    value={editProblem.explanation ?? ''}
                     onChange={e => setEditProblem(s => s && { ...s, explanation: e.target.value })}
                   />
                 </div>

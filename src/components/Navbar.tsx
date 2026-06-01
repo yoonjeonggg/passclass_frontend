@@ -6,7 +6,7 @@ import type { NotificationResponse } from "../types";
 import { isAdmin, isTeacher } from "../utils/roles";
 import {
   IconBell, IconUser, IconBook, IconLogOut, IconChevronDown,
-  IconMonitor, IconVideo, IconFileText
+  IconMonitor, IconVideo, IconFileText, IconAward
 } from "./Icons";
 import "./Navbar.css";
 
@@ -23,8 +23,10 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [menuOpen, setMenuOpen]       = useState(false);
-  const [notifOpen, setNotifOpen]     = useState(false);
+  const [menuOpen, setMenuOpen]         = useState(false);
+  const [notifOpen, setNotifOpen]       = useState(false);
+  const [teacherOpen, setTeacherOpen]   = useState(false);
+  const teacherRef = useRef<HTMLDivElement>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const [notifLoading, setNotifLoading]   = useState(false);
@@ -43,6 +45,7 @@ export default function Navbar() {
     const handler = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
       if (menuRef.current  && !menuRef.current.contains(e.target as Node))  setMenuOpen(false);
+      if (teacherRef.current && !teacherRef.current.contains(e.target as Node)) setTeacherOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -83,7 +86,8 @@ export default function Navbar() {
 
   const isActive = (path: string) => location.pathname === path;
   const staffAdminActive = location.pathname.startsWith("/admin");
-  const staffTeacherActive = location.pathname.startsWith("/teacher");
+  const staffTeacherActive = location.pathname === "/teacher";
+  const teacherMyLecturesActive = location.pathname.startsWith("/teacher/my-lectures");
 
   return (
     <nav className="navbar">
@@ -107,7 +111,32 @@ export default function Navbar() {
             <Link to="/admin" className={`nav-link ${staffAdminActive ? "active" : ""}`}>관리</Link>
           )}
           {user && isTeacher(user) && (
-            <Link to="/teacher" className={`nav-link ${staffTeacherActive ? "active" : ""}`}>강사</Link>
+            <div className="teacher-nav-wrap" ref={teacherRef}>
+              <button
+                className={`nav-link teacher-nav-btn ${(staffTeacherActive || teacherMyLecturesActive) ? "active" : ""}`}
+                onClick={() => setTeacherOpen(v => !v)}
+              >
+                강사 <IconChevronDown size={12} className={`chevron ${teacherOpen ? "open" : ""}`} />
+              </button>
+              {teacherOpen && (
+                <div className="teacher-nav-dropdown">
+                  <Link
+                    to="/teacher/my-lectures"
+                    className={`teacher-nav-item ${teacherMyLecturesActive ? "active" : ""}`}
+                    onClick={() => setTeacherOpen(false)}
+                  >
+                    <IconBook size={14} /> 내 강의
+                  </Link>
+                  <Link
+                    to="/teacher"
+                    className={`teacher-nav-item ${staffTeacherActive ? "active" : ""}`}
+                    onClick={() => setTeacherOpen(false)}
+                  >
+                    <IconVideo size={14} /> 강사 스튜디오
+                  </Link>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -115,12 +144,17 @@ export default function Navbar() {
           {user && (isTeacher(user) || isAdmin(user)) && (
             <div className="navbar-staff-mobile" aria-label="운영 메뉴">
               {isTeacher(user) && (
-                <Link to="/teacher" className="navbar-staff-icon" title="강사 스튜디오">
+                <Link to="/teacher/my-lectures" className={`navbar-staff-icon ${teacherMyLecturesActive ? "active" : ""}`} title="내 강의">
+                  <IconBook size={18} />
+                </Link>
+              )}
+              {isTeacher(user) && (
+                <Link to="/teacher" className={`navbar-staff-icon ${staffTeacherActive ? "active" : ""}`} title="강사 스튜디오">
                   <IconVideo size={18} />
                 </Link>
               )}
               {isAdmin(user) && (
-                <Link to="/admin" className="navbar-staff-icon" title="관리자">
+                <Link to="/admin" className={`navbar-staff-icon ${staffAdminActive ? "active" : ""}`} title="관리자">
                   <IconMonitor size={18} />
                 </Link>
               )}
@@ -212,6 +246,11 @@ export default function Navbar() {
                     {isAdmin(user) && (
                       <Link to="/admin" className="dropdown-item" onClick={() => setMenuOpen(false)}>
                         <IconMonitor size={15} /> 관리자
+                      </Link>
+                    )}
+                    {isTeacher(user) && (
+                      <Link to="/teacher/my-lectures" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                        <IconBook size={15} /> 내 강의
                       </Link>
                     )}
                     {isTeacher(user) && (

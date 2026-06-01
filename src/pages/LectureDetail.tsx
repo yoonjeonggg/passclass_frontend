@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { lectureApi, enrollmentApi, chapterApi, likeApi, reviewApi } from "../api";
+import { lectureApi, enrollmentApi, chapterApi, likeApi, reviewApi, questionApi } from "../api";
 import { IconStar, IconUsers, IconVideo, IconHeart, IconCheck, IconAward, IconChevronLeft } from "../components/Icons";
 import type {
   LectureDetailResponse,
@@ -8,6 +8,7 @@ import type {
   LectureProgressResponse,
   ReviewResponse,
   ReviewSummaryResponse,
+  LectureQuestionResponse,
 } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
@@ -76,6 +77,7 @@ export default function LectureDetail() {
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [cancellingEnrollment, setCancellingEnrollment] = useState(false);
   const [watchData, setWatchData] = useState<ChapterWatchResponse | null>(null);
   const [watchLoading, setWatchLoading] = useState(false);
   const [activeChapter, setActiveChapter] = useState<number | null>(null);
@@ -100,9 +102,20 @@ export default function LectureDetail() {
   const [reviewForm, setReviewForm] = useState({ rating: 0, content: "" });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [replyingReviewId, setReplyingReviewId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [submittingReply, setSubmittingReply] = useState(false);
+
+  // Q&A
+  const [questions, setQuestions] = useState<LectureQuestionResponse[]>([]);
+  const [questionInput, setQuestionInput] = useState("");
+  const [submittingQuestion, setSubmittingQuestion] = useState(false);
 
   // Active tab in body area
-  const [activeTab, setActiveTab] = useState<"curriculum" | "reviews">("curriculum");
+  const [activeTab, setActiveTab] = useState<"curriculum" | "reviews" | "questions">("curriculum");
+
+  // 강사 여부 (강의 로드 후 정확해짐, 초기값 false로 안전)
+  const isInstructor = !!(lecture && user && user.id === lecture.instructor?.id);
 
   useEffect(() => {
     if (!lectureId) return;
@@ -112,6 +125,7 @@ export default function LectureDetail() {
       lectureApi.getDetail(id),
       reviewApi.getList(id),
       reviewApi.getSummary(id),
+      questionApi.getList(id).catch(() => ({ data: [] })),
     ];
 
     if (user) {
@@ -119,13 +133,14 @@ export default function LectureDetail() {
     }
 
     Promise.all(promises)
-      .then(([lRes, reviewRes, summaryRes, enrollRes]) => {
+      .then(([lRes, reviewRes, summaryRes, qRes, enrollRes]) => {
         const l = lRes.data;
         setLecture(l);
         setIsLiked(l.isLiked ?? false);
         setLikeCount(l.likeCount ?? 0);
         setReviews(reviewRes.data);
         setReviewSummary(summaryRes.data);
+        setQuestions((qRes as any).data ?? []);
         if (enrollRes) {
           const alreadyEnrolled = enrollRes.data.some((e: any) => e.lectureId === id);
           setEnrolled(alreadyEnrolled);
@@ -149,6 +164,7 @@ export default function LectureDetail() {
 
   const handleEnroll = async () => {
     if (!user) { navigate("/login"); return; }
+    if (isInstructor) { toast("자신의 강의는 수강 신청할 수 없습니다.", "error"); return; }
     setEnrolling(true);
     try {
       await enrollmentApi.enroll(Number(lectureId));
@@ -158,6 +174,24 @@ export default function LectureDetail() {
       toast(err.message || "수강 신청 실패", "error");
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  const handleCancelEnrollment = async () => {
+    if (!window.confirm("수강을 취소하시겠습니까? 학습 진도가 초기화됩니다.")) return;
+    setCancellingEnrollment(true);
+    try {
+      await enrollmentApi.cancel(Number(lectureId));
+      setEnrolled(false);
+      setProgressData(null);
+      setCompletedChapters(new Set());
+      setWatchData(null);
+      setActiveChapter(null);
+      toast("수강이 취소되었습니다.", "info");
+    } catch (err: any) {
+      toast(err.message || "수강 취소 실패", "error");
+    } finally {
+      setCancellingEnrollment(false);
     }
   };
 
@@ -243,7 +277,10 @@ export default function LectureDetail() {
       const res = await chapterApi.watch(chapterId);
       setWatchData(res.data);
     } catch (err: any) {
-      toast(err.message || "수강 신청 후 이용 가능합니다.", "error");
+      const msg = isInstructor
+        ? (err.message || "강의 영상을 불러오지 못했습니다.")
+        : (err.message || "수강 신청 후 이용 가능합니다.");
+      toast(msg, "error");
       setActiveChapter(null);
     } finally {
       setWatchLoading(false);
@@ -300,6 +337,41 @@ export default function LectureDetail() {
       toast(err.message || "리뷰 등록 실패", "error");
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const handleSubmitReply = async (reviewId: number) => {
+    if (!replyText.trim()) { toast("답글 내용을 입력해주세요.", "error"); return; }
+    setSubmittingReply(true);
+    try {
+      await reviewApi.reply(reviewId, { reply: replyText.trim() });
+      toast("답글이 등록되었습니다.", "success");
+      setReplyingReviewId(null);
+      setReplyText("");
+      const reviewRes = await reviewApi.getList(Number(lectureId));
+      setReviews(reviewRes.data);
+    } catch (err: any) {
+      toast(err.message || "답글 등록 실패", "error");
+    } finally {
+      setSubmittingReply(false);
+    }
+  };
+
+  const handleSubmitQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) { navigate("/login"); return; }
+    if (!questionInput.trim()) { toast("질문 내용을 입력해주세요.", "error"); return; }
+    setSubmittingQuestion(true);
+    try {
+      await questionApi.ask(Number(lectureId), { content: questionInput.trim() });
+      toast("질문이 등록되었습니다.", "success");
+      setQuestionInput("");
+      const q = await questionApi.getList(Number(lectureId));
+      setQuestions(q.data);
+    } catch (err: any) {
+      toast(err.message || "질문 등록 실패", "error");
+    } finally {
+      setSubmittingQuestion(false);
     }
   };
 
@@ -534,6 +606,15 @@ export default function LectureDetail() {
                   <span className="tab-count">{reviewSummary.reviewCount}</span>
                 )}
               </button>
+              <button
+                className={`detail-tab ${activeTab === "questions" ? "active" : ""}`}
+                onClick={() => setActiveTab("questions")}
+              >
+                Q&amp;A
+                {questions.length > 0 && (
+                  <span className="tab-count">{questions.length}</span>
+                )}
+              </button>
             </div>
           )}
 
@@ -604,33 +685,182 @@ export default function LectureDetail() {
               )}
               {reviews.length > 0 ? (
                 <div className="review-list">
-                  {reviews.map((r) => (
-                    <div key={r.reviewId} className="review-item">
-                      <div className="review-top">
-                        <div className="review-author">
-                          <div className="review-avatar">
-                            {r.profileUrl ? (
-                              <img src={r.profileUrl} alt="" />
-                            ) : (
-                              <span>{r.nickname[0]}</span>
-                            )}
-                          </div>
-                          <div>
-                            <div className="review-nickname">{r.nickname}</div>
-                            <div className="review-date">
-                              {new Date(r.createdAt).toLocaleDateString("ko-KR")}
+                  {reviews.map((r) => {
+                    return (
+                      <div key={r.reviewId} className="review-item">
+                        <div className="review-top">
+                          <div className="review-author">
+                            <div className="review-avatar">
+                              {r.profileUrl ? (
+                                <img src={r.profileUrl} alt="" />
+                              ) : (
+                                <span>{r.nickname[0]}</span>
+                              )}
+                            </div>
+                            <div>
+                              <div className="review-nickname">{r.nickname}</div>
+                              <div className="review-date">
+                                {new Date(r.createdAt).toLocaleDateString("ko-KR")}
+                              </div>
                             </div>
                           </div>
+                          <StarRating value={Math.round(r.rating)} />
                         </div>
-                        <StarRating value={Math.round(r.rating)} />
+                        <p className="review-content">{r.content}</p>
+
+                        {/* 강사 답글 */}
+                        {r.reply && (
+                          <div className="review-reply">
+                            <div className="review-reply-header">
+                              <span className="review-reply-badge">강사 답글</span>
+                              <span className="review-reply-instructor">{r.instructorNickname}</span>
+                              {r.replyAt && (
+                                <span className="review-reply-date">{new Date(r.replyAt).toLocaleDateString("ko-KR")}</span>
+                              )}
+                            </div>
+                            <p className="review-reply-content">{r.reply}</p>
+                          </div>
+                        )}
+
+                        {/* 강사 답글 버튼 */}
+                        {isInstructor && !r.reply && replyingReviewId !== r.reviewId && (
+                          <button
+                            type="button"
+                            className="btn btn-ghost"
+                            style={{ fontSize: 12, padding: "4px 10px", marginTop: 8 }}
+                            onClick={() => { setReplyingReviewId(r.reviewId); setReplyText(""); }}
+                          >
+                            답글 달기
+                          </button>
+                        )}
+
+                        {isInstructor && replyingReviewId === r.reviewId && (
+                          <div className="review-reply-form" style={{ marginTop: 12 }}>
+                            <textarea
+                              className="form-input review-textarea"
+                              placeholder="수강생 리뷰에 답글을 작성해주세요."
+                              value={replyText}
+                              onChange={e => setReplyText(e.target.value)}
+                              rows={3}
+                            />
+                            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                              <button
+                                type="button"
+                                className="btn btn-primary"
+                                style={{ fontSize: 13 }}
+                                disabled={submittingReply}
+                                onClick={() => handleSubmitReply(r.reviewId)}
+                              >
+                                {submittingReply ? "등록 중..." : "답글 등록"}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-ghost"
+                                style={{ fontSize: 13 }}
+                                onClick={() => setReplyingReviewId(null)}
+                              >
+                                취소
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <p className="review-content">{r.content}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="review-empty">
                   <span>아직 리뷰가 없습니다. 첫 번째 리뷰를 작성해보세요!</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Q&A tab */}
+          {!watchData && activeTab === "questions" && (
+            <div className="reviews-section">
+              <div className="reviews-header">
+                <h2 className="section-heading">Q&amp;A</h2>
+              </div>
+
+              {!user ? (
+                <p style={{ fontSize: 13, color: "var(--gray-400)" }}>
+                  <button className="btn btn-outline" style={{ fontSize: 13 }} onClick={() => navigate("/login")}>
+                    로그인
+                  </button>
+                  {" "}후 질문을 등록할 수 있습니다.
+                </p>
+              ) : lecture && user.id === lecture.instructor?.id ? (
+                <div style={{ padding: "12px 16px", background: "var(--surface-bg, #f8f9fa)", borderRadius: 8, fontSize: 13, color: "var(--gray-500)" }}>
+                  강사는 수강생의 질문에{" "}
+                  <Link to={`/teacher/my-lectures/${lectureId}`} style={{ color: "var(--primary)", fontWeight: 600 }}>
+                    내 강의 페이지
+                  </Link>
+                  에서 확인하고 답변할 수 있습니다.
+                </div>
+              ) : (
+                <form className="review-form" onSubmit={handleSubmitQuestion}>
+                  <div className="form-group">
+                    <label>강사에게 질문하기</label>
+                    <textarea
+                      className="form-input review-textarea"
+                      placeholder="강의에 대해 궁금한 점을 질문해 보세요."
+                      value={questionInput}
+                      onChange={e => setQuestionInput(e.target.value)}
+                      rows={3}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={submittingQuestion} style={{ alignSelf: "flex-start" }}>
+                    {submittingQuestion ? "등록 중..." : "질문 등록"}
+                  </button>
+                </form>
+              )}
+
+              {questions.length > 0 ? (
+                <div className="review-list" style={{ marginTop: 24 }}>
+                  {questions.map(q => (
+                    <div key={q.id} className="review-item">
+                      <div className="review-top">
+                        <div className="review-author">
+                          <div className="review-avatar">
+                            {q.profileImage
+                              ? <img src={q.profileImage} alt="" />
+                              : <span>{q.nickname[0]}</span>
+                            }
+                          </div>
+                          <div>
+                            <div className="review-nickname">{q.nickname}</div>
+                            <div className="review-date">{new Date(q.createdAt).toLocaleDateString("ko-KR")}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="review-content">{q.content}</p>
+
+                      {q.answer && (
+                        <div className="review-reply">
+                          <div className="review-reply-header">
+                            <span className="review-reply-badge">강사 답변</span>
+                            {q.answererNickname && (
+                              <span className="review-reply-instructor">{q.answererNickname}</span>
+                            )}
+                            {q.answeredAt && (
+                              <span className="review-reply-date">{new Date(q.answeredAt).toLocaleDateString("ko-KR")}</span>
+                            )}
+                          </div>
+                          <p className="review-reply-content">{q.answer}</p>
+                        </div>
+                      )}
+
+                      {!q.answer && (
+                        <p style={{ fontSize: 12, color: "var(--gray-400)", marginTop: 8 }}>아직 답변이 없습니다.</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="review-empty" style={{ marginTop: 24 }}>
+                  <span>아직 등록된 질문이 없습니다. 첫 번째 질문을 남겨보세요!</span>
                 </div>
               )}
             </div>
@@ -708,19 +938,50 @@ export default function LectureDetail() {
                 </div>
               )}
 
-              <button
-                className={`btn ${enrolled ? "btn-ghost" : "btn-primary"} enroll-btn`}
-                onClick={handleEnroll}
-                disabled={enrolling || enrolled}
-              >
-                {enrolling ? (
-                  <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                ) : enrolled ? (
-                  <><IconCheck size={15} /> 수강 중</>
-                ) : (
-                  "수강 신청하기"
-                )}
-              </button>
+              {isInstructor ? (
+                <>
+                  <div className="instructor-own-badge">
+                    <IconVideo size={14} /> 내 강의
+                  </div>
+                  <p style={{ fontSize: 12, color: "var(--gray-400)", textAlign: "center", margin: "4px 0 12px" }}>
+                    강사는 자신의 강의를 수강 신청할 수 없습니다
+                  </p>
+                  <Link to={`/teacher/my-lectures/${lectureId}`} className="btn btn-primary enroll-btn">
+                    강의 관리하기
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {enrolled ? (
+                    <>
+                      <div className="btn btn-ghost enroll-btn" style={{ cursor: "default", justifyContent: "center" }}>
+                        <IconCheck size={15} /> 수강 중
+                      </div>
+                      <button
+                        className="btn enroll-cancel-btn"
+                        onClick={handleCancelEnrollment}
+                        disabled={cancellingEnrollment}
+                      >
+                        {cancellingEnrollment
+                          ? <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                          : "수강 취소"
+                        }
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="btn btn-primary enroll-btn"
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                    >
+                      {enrolling
+                        ? <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
+                        : "수강 신청하기"
+                      }
+                    </button>
+                  )}
+                </>
+              )}
               <button
                 className={`btn like-btn ${isLiked ? "like-btn-active" : "btn-ghost"}`}
                 onClick={handleLike}

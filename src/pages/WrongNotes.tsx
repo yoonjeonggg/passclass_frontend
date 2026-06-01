@@ -18,8 +18,9 @@ export default function WrongNotes() {
     try {
       const res = await wrongNoteApi.getMyNotes();
       setNotes(res.data);
-    } catch {
+    } catch (err: unknown) {
       setNotes([]);
+      toast(err instanceof Error ? err.message : '오답노트를 불러오지 못했습니다.', 'error');
     } finally {
       setLoading(false);
     }

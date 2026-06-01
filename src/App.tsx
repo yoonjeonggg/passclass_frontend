@@ -19,6 +19,7 @@ import MockExamSession from './pages/MockExamSession';
 import WrongNotes from './pages/WrongNotes';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
+import TeacherMyLectures from './pages/TeacherMyLectures';
 import { canAccessStaffRoute } from './utils/roles';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -79,6 +80,16 @@ function AppRoutes() {
           <Route path="/teacher" element={
             <ProtectedRoute>
               <RoleRoute roles={['TEACHER']}><TeacherDashboard /></RoleRoute>
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/my-lectures" element={
+            <ProtectedRoute>
+              <RoleRoute roles={['TEACHER']}><TeacherMyLectures /></RoleRoute>
+            </ProtectedRoute>
+          } />
+          <Route path="/teacher/my-lectures/:lectureId" element={
+            <ProtectedRoute>
+              <RoleRoute roles={['TEACHER']}><TeacherMyLectures /></RoleRoute>
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />

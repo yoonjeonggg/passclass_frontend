@@ -293,6 +293,66 @@
 
 .dropdown-divider { height: 1px; background: #f0f0f0; margin: 3px 0; }
 
+/* 강사 nav 드롭다운 */
+.teacher-nav-wrap {
+  position: relative;
+}
+
+.teacher-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.teacher-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: white;
+  border: 1px solid #ebebeb;
+  border-radius: var(--radius, 10px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  min-width: 160px;
+  overflow: hidden;
+  animation: fadeUp 0.15s ease;
+  z-index: 200;
+}
+
+.teacher-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700, #374151);
+  text-decoration: none;
+  transition: background 0.12s;
+}
+
+.teacher-nav-item:hover {
+  background: var(--gray-100, #f3f4f6);
+  color: var(--black, #111);
+}
+
+.teacher-nav-item.active {
+  color: var(--orange, #f97316);
+  font-weight: 600;
+}
+
+.teacher-nav-item svg {
+  color: var(--gray-400, #9ca3af);
+  flex-shrink: 0;
+}
+
+.teacher-nav-item.active svg {
+  color: var(--orange, #f97316);
+}
+
 /* 모바일: 상단 링크 숨김 시 강사·관리자 바로가기 */
 .navbar-staff-mobile {
   display: none;
@@ -313,10 +373,11 @@
   transition: background 0.15s, border-color 0.15s;
 }
 
-.navbar-staff-icon:hover {
+.navbar-staff-icon:hover,
+.navbar-staff-icon.active {
   background: var(--orange-dim);
   border-color: var(--orange);
-  color: var(--orange-light);
+  color: var(--orange);
 }
 
 @media (max-width: 640px) {

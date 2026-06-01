@@ -638,6 +638,49 @@
   font-size: 15px;
 }
 
+.instructor-own-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--orange, #f97316);
+  margin-bottom: 8px;
+}
+
+.enroll-cancel-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 10px;
+  font-size: 13px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6b7280;
+  cursor: pointer;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.enroll-cancel-btn:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.enroll-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .like-btn {
   width: 100%;
   justify-content: center;
@@ -775,6 +818,55 @@
   border-radius: var(--radius);
 }
 
+.review-reply {
+  margin-top: 12px;
+  background: #f8f9fa;
+  border-left: 3px solid var(--primary, #5b6cff);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 12px 16px;
+}
+
+.review-reply-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.review-reply-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary, #5b6cff);
+  background: rgba(91, 108, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.review-reply-instructor {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700, #333);
+}
+
+.review-reply-date {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin-left: auto;
+}
+
+.review-reply-content {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--gray-600);
+  white-space: pre-wrap;
+}
+
+.review-reply-form {
+  background: #f8f9fa;
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1024px) {
   .player-zone {
@@ -808,3 +900,4 @@
     position: relative;
   }
 }
+

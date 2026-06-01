@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { certificateApi, lectureApi, chapterApi } from '../api';
+import { certificateApi, lectureApi, chapterApi, fileApi } from '../api';
 import type { CertificateResponse, LectureListDto, LectureChapterResponse } from '../types';
 import { useToast } from '../components/Toast';
 import StaffProblemsMockSection from './StaffProblemsMockSection';
 import './StaffDashboard.css';
 import './StaffProblemsMockSection.css';
+
+type StatSortKey = 'enrollmentCount' | 'likeCount' | 'rating';
+
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -21,6 +24,7 @@ export default function TeacherDashboard() {
     thumbnailUrl: '',
   });
   const [lectureSaving, setLectureSaving] = useState(false);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
 
   const [selectedLectureId, setSelectedLectureId] = useState<number | ''>('');
   const [chapters, setChapters] = useState<LectureChapterResponse[]>([]);
@@ -30,7 +34,10 @@ export default function TeacherDashboard() {
     videoUrl: '',
     chapterOrder: 1,
   });
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [editVideoUploading, setEditVideoUploading] = useState(false);
   const [editChapter, setEditChapter] = useState<LectureChapterResponse | null>(null);
+  const [statSort, setStatSort] = useState<StatSortKey>('enrollmentCount');
 
   const refreshMyLectures = useCallback(() => {
     if (!user) return;
@@ -209,12 +216,30 @@ export default function TeacherDashboard() {
                 />
               </div>
               <div className="staff-field">
-                <label>썸네일 URL</label>
+                <label>썸네일 이미지</label>
                 <input
-                  value={lectureForm.thumbnailUrl}
-                  onChange={e => setLectureForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
-                  placeholder="https://..."
+                  type="file"
+                  accept="image/*"
+                  disabled={thumbnailUploading}
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setThumbnailUploading(true);
+                    try {
+                      const res = await fileApi.upload(file);
+                      setLectureForm(f => ({ ...f, thumbnailUrl: res.data.fileUrl }));
+                      toast('썸네일이 업로드되었습니다.', 'success');
+                    } catch {
+                      toast('썸네일 업로드 실패', 'error');
+                    } finally {
+                      setThumbnailUploading(false);
+                    }
+                  }}
                 />
+                {thumbnailUploading && <span className="staff-hint">업로드 중…</span>}
+                {lectureForm.thumbnailUrl && !thumbnailUploading && (
+                  <img src={lectureForm.thumbnailUrl} alt="썸네일 미리보기" style={{ marginTop: 8, maxHeight: 80, borderRadius: 6 }} />
+                )}
               </div>
             </div>
             <div className="staff-actions">
@@ -258,13 +283,30 @@ export default function TeacherDashboard() {
                   />
                 </div>
                 <div className="staff-field">
-                  <label>영상 URL</label>
+                  <label>강의 영상</label>
                   <input
-                    value={chapterForm.videoUrl}
-                    onChange={e => setChapterForm(f => ({ ...f, videoUrl: e.target.value }))}
-                    placeholder="https://..."
-                    required
+                    type="file"
+                    accept="video/*"
+                    disabled={videoUploading}
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setVideoUploading(true);
+                      try {
+                        const res = await fileApi.upload(file);
+                        setChapterForm(f => ({ ...f, videoUrl: res.data.fileUrl }));
+                        toast('영상이 업로드되었습니다.', 'success');
+                      } catch {
+                        toast('영상 업로드 실패', 'error');
+                      } finally {
+                        setVideoUploading(false);
+                      }
+                    }}
                   />
+                  {videoUploading && <span className="staff-hint">업로드 중…</span>}
+                  {chapterForm.videoUrl && !videoUploading && (
+                    <span className="staff-hint" style={{ color: 'green' }}>영상 업로드 완료</span>
+                  )}
                 </div>
                 <div className="staff-field" style={{ maxWidth: 200 }}>
                   <label>순서</label>
@@ -277,7 +319,7 @@ export default function TeacherDashboard() {
                   />
                 </div>
                 <div className="staff-actions">
-                  <button type="submit" className="btn btn-primary">챕터 등록</button>
+                  <button type="submit" className="btn btn-primary" disabled={videoUploading || !chapterForm.videoUrl}>챕터 등록</button>
                   <Link to={`/lectures/${selectedLectureId}`} className="btn btn-outline">강의 페이지 보기</Link>
                 </div>
               </form>
@@ -322,6 +364,63 @@ export default function TeacherDashboard() {
           )}
         </section>
 
+        {/* 강의 통계 섹션 */}
+        <section className="staff-panel">
+          <h2 className="staff-panel-title">내 강의 통계</h2>
+          <p className="staff-panel-desc">등록한 강의의 수강자 수, 좋아요, 평점을 확인합니다.</p>
+
+          {myLectures.length === 0 ? (
+            <p className="staff-hint">아직 등록된 강의가 없습니다.</p>
+          ) : (
+            <>
+              <div className="staff-field" style={{ maxWidth: 260, marginBottom: 16 }}>
+                <label>정렬 기준</label>
+                <select value={statSort} onChange={e => setStatSort(e.target.value as StatSortKey)}>
+                  <option value="enrollmentCount">수강자 많은 순</option>
+                  <option value="likeCount">좋아요 많은 순</option>
+                  <option value="rating">평점 높은 순</option>
+                </select>
+              </div>
+              <div className="staff-table-wrap">
+                <table className="staff-table">
+                  <thead>
+                    <tr>
+                      <th>강의명</th>
+                      <th>자격증</th>
+                      <th>수강자</th>
+                      <th>좋아요</th>
+                      <th>평점</th>
+                      <th>보기</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...myLectures]
+                      .sort((a, b) => {
+                        if (statSort === 'enrollmentCount') return (b.enrollmentCount ?? 0) - (a.enrollmentCount ?? 0);
+                        if (statSort === 'likeCount') return (b.likeCount ?? 0) - (a.likeCount ?? 0);
+                        return (b.rating ?? 0) - (a.rating ?? 0);
+                      })
+                      .map(l => (
+                        <tr key={l.id}>
+                          <td>{l.title}</td>
+                          <td className="cell-muted">{l.certificate?.name ?? '—'}</td>
+                          <td><strong>{(l.enrollmentCount ?? 0).toLocaleString()}</strong>명</td>
+                          <td><strong>{(l.likeCount ?? 0).toLocaleString()}</strong></td>
+                          <td><strong>{(l.rating ?? 0).toFixed(1)}</strong></td>
+                          <td>
+                            <Link to={`/lectures/${l.id}`} className="staff-btn-sm staff-btn-muted">
+                              페이지
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </section>
+
         <StaffProblemsMockSection />
       </div>
 
@@ -339,12 +438,32 @@ export default function TeacherDashboard() {
                 />
               </div>
               <div className="staff-field">
-                <label>영상 URL</label>
+                <label>강의 영상 교체</label>
                 <input
-                  value={editChapter.videoUrl}
-                  onChange={e => setEditChapter(c => c && { ...c, videoUrl: e.target.value })}
-                  required
+                  type="file"
+                  accept="video/*"
+                  disabled={editVideoUploading}
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setEditVideoUploading(true);
+                    try {
+                      const res = await fileApi.upload(file);
+                      setEditChapter(c => c && { ...c, videoUrl: res.data.fileUrl });
+                      toast('영상이 업로드되었습니다.', 'success');
+                    } catch {
+                      toast('영상 업로드 실패', 'error');
+                    } finally {
+                      setEditVideoUploading(false);
+                    }
+                  }}
                 />
+                {editVideoUploading && <span className="staff-hint">업로드 중…</span>}
+                {editChapter.videoUrl && !editVideoUploading && (
+                  <span className="staff-hint" style={{ marginTop: 4, display: 'block' }}>
+                    현재: <a href={editChapter.videoUrl} target="_blank" rel="noreferrer">영상 보기</a>
+                  </span>
+                )}
               </div>
               <div className="staff-field" style={{ maxWidth: 200 }}>
                 <label>순서</label>

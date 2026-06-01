@@ -85,6 +85,9 @@ export interface LectureListDto {
   thumbnailUrl: string;
   rating: number;
   certificate: CertificateInfo;
+  enrollmentCount: number;
+  likeCount: number;
+  instructorNickname: string;
 }
 
 export interface InstructorDto {
@@ -200,6 +203,10 @@ export interface ReviewRequest {
   content: string;
 }
 
+export interface ReviewReplyRequest {
+  reply: string;
+}
+
 export interface ReviewResponse {
   reviewId: number;
   rating: number;
@@ -207,6 +214,18 @@ export interface ReviewResponse {
   nickname: string;
   profileUrl: string;
   createdAt: string;
+  reply?: string;
+  replyAt?: string;
+  instructorNickname?: string;
+  instructorProfileUrl?: string;
+}
+
+export interface LectureUpdateRequest {
+  certificateId: number;
+  title: string;
+  description?: string;
+  category?: string;
+  thumbnailUrl?: string;
 }
 
 export interface ReviewSummaryResponse {
@@ -373,6 +392,28 @@ export interface WrongNoteResponse {
   correctAnswer: number;
   explanation: string;
   memo: string | null;
+}
+
+// Q&A
+export interface LectureQuestionRequest {
+  content: string;
+}
+
+export interface LectureAnswerRequest {
+  answer: string;
+}
+
+export interface LectureQuestionResponse {
+  id: number;
+  lectureId: number;
+  userId: number;
+  nickname: string;
+  profileImage?: string;
+  content: string;
+  answer?: string;
+  answeredAt?: string;
+  answererNickname?: string;
+  createdAt: string;
 }
 
 // API Response wrapper

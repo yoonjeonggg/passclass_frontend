@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { lectureApi } from '../api';
 import type { LectureListDto } from '../types';
 import LectureCard from '../components/LectureCard';
+import { useToast } from '../components/Toast';
 import { IconSearch, IconChevronLeft, IconChevronRight } from '../components/Icons';
 import './Lectures.css';
 
@@ -15,6 +16,7 @@ const SORT_OPTIONS = [
 const CATEGORIES = ['전체', '정보기술', '경영/회계', '어학', '의료/보건', '건축/안전', '기계/전기', '기타'];
 
 export default function Lectures() {
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [lectures, setLectures]   = useState<LectureListDto[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -31,12 +33,13 @@ export default function Lectures() {
       setLectures(res.data.content);
       setTotalPages(res.data.totalPages);
       setTotalElements(res.data.totalElements);
-    } catch {
+    } catch (err: unknown) {
       setLectures([]);
+      toast(err instanceof Error ? err.message : '강의 목록을 불러오지 못했습니다.', 'error');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { fetchLectures(page, sort, category); }, [page, sort, category, fetchLectures]);
 

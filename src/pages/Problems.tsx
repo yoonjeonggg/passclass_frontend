@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { certificateApi, problemApi } from '../api';
 import type { CertificateResponse, ProblemListItem, ProblemSolveResponse } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/Toast';
 import { IconFileText, IconCheck, IconX, IconChevronLeft, IconChevronRight } from '../components/Icons';
 import './Problems.css';
 
@@ -15,6 +16,7 @@ interface SolveState {
 
 export default function Problems() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [certificates, setCertificates] = useState<CertificateResponse[]>([]);
@@ -33,17 +35,21 @@ export default function Problems() {
   useEffect(() => {
     certificateApi.getAll()
       .then(res => setCertificates(res.data))
+      .catch(() => toast('자격증 목록을 불러오지 못했습니다.', 'error'))
       .finally(() => setCertLoading(false));
-  }, []);
+  }, [toast]);
 
   const fetchProblems = useCallback((certId: number) => {
     setProbLoading(true);
     setSolveStates({});
     problemApi.getList(certId)
       .then(res => setProblems(res.data))
-      .catch(() => setProblems([]))
+      .catch(() => {
+        setProblems([]);
+        toast('문제 목록을 불러오지 못했습니다.', 'error');
+      })
       .finally(() => setProbLoading(false));
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     if (selectedCertId) fetchProblems(selectedCertId);
@@ -85,8 +91,9 @@ export default function Problems() {
         ...prev,
         [problemId]: { ...prev[problemId], submitted: true, result: res.data, loading: false },
       }));
-    } catch {
+    } catch (err: unknown) {
       setSolveStates(prev => ({ ...prev, [problemId]: { ...prev[problemId], loading: false } }));
+      toast(err instanceof Error ? err.message : '채점 중 오류가 발생했습니다.', 'error');
     }
   };
 

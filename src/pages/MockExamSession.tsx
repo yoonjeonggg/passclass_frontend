@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { mockExamApi } from '../api';
 import type { MockExamDetailResponse, MockExamQuestion, MockExamResultItem } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/Toast';
 import { IconCheck, IconX, IconArrowRight, IconClipboard } from '../components/Icons';
 import './MockExamSession.css';
 
@@ -12,6 +13,7 @@ export default function MockExamSession() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const [phase, setPhase] = useState<Phase>('loading');
   const [exam, setExam] = useState<MockExamDetailResponse | null>(null);
@@ -54,8 +56,8 @@ export default function MockExamSession() {
       setResults(res.data.results);
       setPhase('result');
       setCurrentQ(0);
-    } catch {
-      alert('제출에 실패했습니다. 다시 시도해주세요.');
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : '제출에 실패했습니다. 다시 시도해주세요.', 'error');
     } finally {
       setSubmitting(false);
     }

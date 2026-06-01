@@ -15,7 +15,23 @@
       "Bash(Head -100)",
       "mcp__claude_ai_Notion__notion-fetch",
       "Bash(Get-ChildItem -Recurse -Filter \"*MockExam*\")",
-      "Bash(./gradlew test *)"
+      "Bash(./gradlew test *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(Get-Content \"D:\\\\PassClass\\\\PassClass_frontend\\\\src\\\\pages\\\\LectureDetail.css\")",
+      "Bash(Select-Object -Last 5)",
+      "Bash(./gradlew compileJava)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(node -e \"require\\('playwright'\\)\")",
+      "Bash(npx playwright *)",
+      "Bash(node test_features.mjs)",
+      "Bash(npm install *)",
+      "Bash(Select-Object Name)",
+      "PowerShell(Head *)",
+      "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend -Recurse -File | Where-Object { $_.Extension -in @\\('.py', '.java'\\) } | Select-Object -First 60 | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend -Recurse -File | Where-Object { $_.Extension -in @\\('.py', '.java'\\) } | Select-Object -Skip 60 -First 60 | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend\\\\src -Recurse -File | Where-Object { $_.Extension -eq \".java\" } | ForEach-Object { $_.FullName } | Sort-Object)"
     ]
   }
 }
