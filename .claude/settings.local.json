@@ -31,7 +31,8 @@
       "PowerShell(Head *)",
       "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend -Recurse -File | Where-Object { $_.Extension -in @\\('.py', '.java'\\) } | Select-Object -First 60 | ForEach-Object { $_.FullName })",
       "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend -Recurse -File | Where-Object { $_.Extension -in @\\('.py', '.java'\\) } | Select-Object -Skip 60 -First 60 | ForEach-Object { $_.FullName })",
-      "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend\\\\src -Recurse -File | Where-Object { $_.Extension -eq \".java\" } | ForEach-Object { $_.FullName } | Sort-Object)"
+      "PowerShell(Get-ChildItem D:\\\\PassClass\\\\PassClass_backend\\\\src -Recurse -File | Where-Object { $_.Extension -eq \".java\" } | ForEach-Object { $_.FullName } | Sort-Object)",
+      "WebFetch(domain:52.78.64.228)"
     ]
   }
 }

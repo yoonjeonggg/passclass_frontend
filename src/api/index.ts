@@ -24,33 +24,33 @@ import type {
 // Auth
 export const authApi = {
   signup: (data: SignupRequest) =>
-    api.post<ApiResponse<SignupResponse>>('/api/auth/signup', data),
+    api.post<ApiResponse<SignupResponse>>('/auth/signup', data),
   login: (data: LoginRequest) =>
-    api.post<ApiResponse<TokenResponse>>('/api/auth/login', data),
-  logout: () => api.post<ApiResponse<void>>('/api/auth/log-out'),
+    api.post<ApiResponse<TokenResponse>>('/auth/login', data),
+  logout: () => api.post<ApiResponse<void>>('/auth/log-out'),
   autoLogin: (data: AutoLoginRequest) =>
-    api.post<ApiResponse<TokenResponse>>('/api/auth/auto-login', data),
+    api.post<ApiResponse<TokenResponse>>('/auth/auto-login', data),
 };
 
 // User
 export const userApi = {
-  getMyProfile: () => api.get<ApiResponse<MyProfileResponse>>('/api/user/profile/me'),
+  getMyProfile: () => api.get<ApiResponse<MyProfileResponse>>('/user/profile/me'),
   patchMyProfile: (data: PatchMyProfileRequest) =>
-    api.patch<ApiResponse<MyProfileResponse>>('/api/user/profile/me', data),
+    api.patch<ApiResponse<MyProfileResponse>>('/user/profile/me', data),
   getProfile: (userId: number) =>
-    api.get<ApiResponse<ProfileResponse>>(`/api/user/profile/${userId}`),
+    api.get<ApiResponse<ProfileResponse>>(`/user/profile/${userId}`),
 };
 
 // Certificate
 export const certificateApi = {
-  getAll: () => api.get<ApiResponse<CertificateResponse[]>>('/api/certificates'),
+  getAll: () => api.get<ApiResponse<CertificateResponse[]>>('/certificates'),
   search: (keyword: string) =>
-    api.get<ApiResponse<CertificateResponse[]>>(`/api/certificates/search?keyword=${encodeURIComponent(keyword)}`),
+    api.get<ApiResponse<CertificateResponse[]>>(`/certificates/search?keyword=${encodeURIComponent(keyword)}`),
   create: (data: CertificateRequest) =>
-    api.post<ApiResponse<CertificateResponse>>('/api/certificates', data),
+    api.post<ApiResponse<CertificateResponse>>('/certificates', data),
   update: (id: number, data: CertificateRequest) =>
-    api.put<ApiResponse<CertificateResponse>>(`/api/certificates/${id}`, data),
-  delete: (id: number) => api.delete<ApiResponse<void>>(`/api/certificates/${id}`),
+    api.put<ApiResponse<CertificateResponse>>(`/certificates/${id}`, data),
+  delete: (id: number) => api.delete<ApiResponse<void>>(`/certificates/${id}`),
 };
 
 // Lecture
@@ -61,68 +61,68 @@ export const lectureApi = {
     if (params.size !== undefined) q.set('size', String(params.size));
     if (params.category) q.set('category', params.category);
     if (params.sort) q.set('sort', params.sort);
-    return api.get<ApiResponse<PageLectureListDto>>(`/api/lecture?${q}`);
+    return api.get<ApiResponse<PageLectureListDto>>(`/lecture?${q}`);
   },
   getDetail: (lectureId: number) =>
-    api.get<ApiResponse<LectureDetailResponse>>(`/api/lecture/${lectureId}`),
+    api.get<ApiResponse<LectureDetailResponse>>(`/lecture/${lectureId}`),
   create: (data: LectureRequest) =>
-    api.post<ApiResponse<LectureCreateResponse>>('/api/lecture', data),
+    api.post<ApiResponse<LectureCreateResponse>>('/lecture', data),
   update: (lectureId: number, data: LectureUpdateRequest) =>
-    api.put<ApiResponse<void>>(`/api/lecture/${lectureId}`, data),
+    api.put<ApiResponse<void>>(`/lecture/${lectureId}`, data),
   delete: (lectureId: number) =>
-    api.delete<ApiResponse<void>>(`/api/lecture/${lectureId}`),
+    api.delete<ApiResponse<void>>(`/lecture/${lectureId}`),
   getInstructorProfile: (instructorId: number) =>
-    api.get<ApiResponse<InstructorProfileResponse>>(`/api/lecture/instructor/${instructorId}`),
+    api.get<ApiResponse<InstructorProfileResponse>>(`/lecture/instructor/${instructorId}`),
 };
 
 // LectureChapter
 export const chapterApi = {
   getChapters: (lectureId: number) =>
-    api.get<ApiResponse<LectureChapterResponse[]>>(`/api/lecture/chapters?lectureId=${lectureId}`),
+    api.get<ApiResponse<LectureChapterResponse[]>>(`/lecture/chapters?lectureId=${lectureId}`),
   create: (data: LectureChapterRequest) =>
-    api.post<ApiResponse<LectureChapterResponse>>('/api/lecture/chapters', data),
+    api.post<ApiResponse<LectureChapterResponse>>('/lecture/chapters', data),
   update: (chapterId: number, data: LectureChapterRequest) =>
-    api.put<ApiResponse<LectureChapterResponse>>(`/api/lecture/chapters/${chapterId}`, data),
+    api.put<ApiResponse<LectureChapterResponse>>(`/lecture/chapters/${chapterId}`, data),
   delete: (chapterId: number) =>
-    api.delete<ApiResponse<void>>(`/api/lecture/chapters/${chapterId}`),
+    api.delete<ApiResponse<void>>(`/lecture/chapters/${chapterId}`),
   watch: (chapterId: number) =>
-    api.get<ApiResponse<ChapterWatchResponse>>(`/api/lecture/chapters/${chapterId}/watch`),
+    api.get<ApiResponse<ChapterWatchResponse>>(`/lecture/chapters/${chapterId}/watch`),
   saveProgress: (chapterId: number, watchedSeconds: number) =>
-    api.patch<ApiResponse<void>>(`/api/lecture/chapters/${chapterId}/progress`, { watchedSeconds }),
+    api.patch<ApiResponse<void>>(`/lecture/chapters/${chapterId}/progress`, { watchedSeconds }),
   complete: (chapterId: number) =>
-    api.post<ApiResponse<void>>(`/api/lecture/chapters/${chapterId}/complete`),
+    api.post<ApiResponse<void>>(`/lecture/chapters/${chapterId}/complete`),
   getMyProgress: (lectureId: number) =>
-    api.get<ApiResponse<LectureProgressResponse>>(`/api/lecture/chapters/progress?lectureId=${lectureId}`),
+    api.get<ApiResponse<LectureProgressResponse>>(`/lecture/chapters/progress?lectureId=${lectureId}`),
 };
 
 // Enrollment
 export const enrollmentApi = {
   enroll: (lectureId: number) =>
-    api.post<ApiResponse<EnrollmentResponse>>(`/api/enrollment/${lectureId}`),
+    api.post<ApiResponse<EnrollmentResponse>>(`/enrollment/${lectureId}`),
   cancel: (lectureId: number) =>
-    api.delete<ApiResponse<void>>(`/api/enrollment/${lectureId}`),
+    api.delete<ApiResponse<void>>(`/enrollment/${lectureId}`),
   getMyEnrollments: () =>
-    api.get<ApiResponse<EnrollmentResponse[]>>('/api/enrollment/me'),
+    api.get<ApiResponse<EnrollmentResponse[]>>('/enrollment/me'),
 };
 
 // Review
 export const reviewApi = {
   create: (data: ReviewRequest) =>
-    api.post<ApiResponse<void>>('/api/reviews', data),
+    api.post<ApiResponse<void>>('/reviews', data),
   update: (reviewId: number, data: ReviewRequest) =>
-    api.put<ApiResponse<void>>(`/api/reviews/${reviewId}`, data),
+    api.put<ApiResponse<void>>(`/reviews/${reviewId}`, data),
   reply: (reviewId: number, data: ReviewReplyRequest) =>
-    api.post<ApiResponse<void>>(`/api/reviews/${reviewId}/reply`, data),
+    api.post<ApiResponse<void>>(`/reviews/${reviewId}/reply`, data),
   getSummary: (lectureId: number) =>
-    api.get<ApiResponse<ReviewSummaryResponse>>(`/api/reviews/summary?lectureId=${lectureId}`),
+    api.get<ApiResponse<ReviewSummaryResponse>>(`/reviews/summary?lectureId=${lectureId}`),
   getList: (lectureId: number) =>
-    api.get<ApiResponse<ReviewResponse[]>>(`/api/reviews?lectureId=${lectureId}`),
+    api.get<ApiResponse<ReviewResponse[]>>(`/reviews?lectureId=${lectureId}`),
 };
 
 // Like
 export const likeApi = {
   toggle: (lectureId: number) =>
-    api.post<ApiResponse<LikeResponse>>(`/api/lectures/${lectureId}/like`),
+    api.post<ApiResponse<LikeResponse>>(`/lectures/${lectureId}/like`),
 };
 
 // File
@@ -130,70 +130,70 @@ export const fileApi = {
   upload: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.upload<ApiResponse<FileResponse>>('/api/files', formData);
+    return api.upload<ApiResponse<FileResponse>>('/files', formData);
   },
   getInfo: (fileId: number) =>
-    api.get<ApiResponse<FileResponse>>(`/api/files/${fileId}`),
+    api.get<ApiResponse<FileResponse>>(`/files/${fileId}`),
   delete: (fileId: number) =>
-    api.delete<ApiResponse<void>>(`/api/files/${fileId}`),
+    api.delete<ApiResponse<void>>(`/files/${fileId}`),
 };
 
 // Problem
 export const problemApi = {
   getList: (certificateId: number) =>
-    api.get<ApiResponse<ProblemListItem[]>>(`/api/problems?certificateId=${certificateId}`),
+    api.get<ApiResponse<ProblemListItem[]>>(`/problems?certificateId=${certificateId}`),
   getDetail: (problemId: number) =>
-    api.get<ApiResponse<ProblemDetail>>(`/api/problems/${problemId}`),
+    api.get<ApiResponse<ProblemDetail>>(`/problems/${problemId}`),
   solve: (problemId: number, data: ProblemSolveRequest) =>
-    api.post<ApiResponse<ProblemSolveResponse>>(`/api/problems/${problemId}/solve`, data),
+    api.post<ApiResponse<ProblemSolveResponse>>(`/problems/${problemId}/solve`, data),
   create: (data: ProblemCreateRequest) =>
-    api.post<ApiResponse<IdOnlyResponse>>('/api/problems', data),
+    api.post<ApiResponse<IdOnlyResponse>>('/problems', data),
   update: (problemId: number, data: ProblemUpdateRequest) =>
-    api.put<ApiResponse<void>>(`/api/problems/${problemId}`, data),
+    api.put<ApiResponse<void>>(`/problems/${problemId}`, data),
   delete: (problemId: number) =>
-    api.delete<ApiResponse<void>>(`/api/problems/${problemId}`),
+    api.delete<ApiResponse<void>>(`/problems/${problemId}`),
 };
 
 // MockExam
 export const mockExamApi = {
   getList: (certificateId: number) =>
-    api.get<ApiResponse<MockExamListItem[]>>(`/api/mock-exams?certificateId=${certificateId}`),
+    api.get<ApiResponse<MockExamListItem[]>>(`/mock-exams?certificateId=${certificateId}`),
   getDetail: (mockExamId: number) =>
-    api.get<ApiResponse<MockExamDetailResponse>>(`/api/mock-exams/${mockExamId}`),
+    api.get<ApiResponse<MockExamDetailResponse>>(`/mock-exams/${mockExamId}`),
   submit: (mockExamId: number, data: MockExamSubmitRequest) =>
-    api.post<ApiResponse<MockExamSubmitResponse>>(`/api/mock-exams/${mockExamId}/submit`, data),
+    api.post<ApiResponse<MockExamSubmitResponse>>(`/mock-exams/${mockExamId}/submit`, data),
   getResults: (mockExamId: number) =>
-    api.get<ApiResponse<MockExamSubmitResponse>>(`/api/mock-exams/${mockExamId}/results`),
+    api.get<ApiResponse<MockExamSubmitResponse>>(`/mock-exams/${mockExamId}/results`),
   create: (data: MockExamCreateRequest) =>
-    api.post<ApiResponse<IdOnlyResponse>>('/api/mock-exams', data),
+    api.post<ApiResponse<IdOnlyResponse>>('/mock-exams', data),
   addQuestion: (mockExamId: number, data: MockExamAddQuestionRequest) =>
-    api.post<ApiResponse<void>>(`/api/mock-exams/${mockExamId}/questions`, data),
+    api.post<ApiResponse<void>>(`/mock-exams/${mockExamId}/questions`, data),
   remove: (mockExamId: number) =>
-    api.delete<ApiResponse<void>>(`/api/mock-exams/${mockExamId}`),
+    api.delete<ApiResponse<void>>(`/mock-exams/${mockExamId}`),
 };
 
 // WrongNote
 export const wrongNoteApi = {
-  getMyNotes: () => api.get<ApiResponse<WrongNoteResponse[]>>('/api/wrong-notes'),
-  deleteNote: (wrongNoteId: number) => api.delete<ApiResponse<void>>(`/api/wrong-notes/${wrongNoteId}`),
+  getMyNotes: () => api.get<ApiResponse<WrongNoteResponse[]>>('/wrong-notes'),
+  deleteNote: (wrongNoteId: number) => api.delete<ApiResponse<void>>(`/wrong-notes/${wrongNoteId}`),
 };
 
 // Q&A
 export const questionApi = {
   getList: (lectureId: number) =>
-    api.get<ApiResponse<LectureQuestionResponse[]>>(`/api/lectures/${lectureId}/questions`),
+    api.get<ApiResponse<LectureQuestionResponse[]>>(`/lectures/${lectureId}/questions`),
   ask: (lectureId: number, data: LectureQuestionRequest) =>
-    api.post<ApiResponse<LectureQuestionResponse>>(`/api/lectures/${lectureId}/questions`, data),
+    api.post<ApiResponse<LectureQuestionResponse>>(`/lectures/${lectureId}/questions`, data),
   answer: (lectureId: number, questionId: number, data: LectureAnswerRequest) =>
-    api.post<ApiResponse<LectureQuestionResponse>>(`/api/lectures/${lectureId}/questions/${questionId}/answer`, data),
+    api.post<ApiResponse<LectureQuestionResponse>>(`/lectures/${lectureId}/questions/${questionId}/answer`, data),
 };
 
 // Notification
 export const notificationApi = {
   getList: (page = 0, size = 10) =>
-    api.get<ApiResponse<PageResponse<NotificationResponse>>>(`/api/notifications?page=${page}&size=${size}`),
+    api.get<ApiResponse<PageResponse<NotificationResponse>>>(`/notifications?page=${page}&size=${size}`),
   markAsRead: (notificationId: number) =>
-    api.patch<ApiResponse<void>>(`/api/notifications/${notificationId}/read`),
+    api.patch<ApiResponse<void>>(`/notifications/${notificationId}/read`),
   getUnreadCount: () =>
-    api.get<ApiResponse<UnreadCountResponse>>('/api/notifications/unread-count'),
+    api.get<ApiResponse<UnreadCountResponse>>('/notifications/unread-count'),
 };
