@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.DEV ? 'http://52.78.64.228/api' : '/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 function getToken(): string | null {
   return localStorage.getItem("accessToken");
